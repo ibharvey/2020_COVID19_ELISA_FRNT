@@ -52,15 +52,21 @@ d_plot$rowname <- as.numeric(d_plot$rowname)
 d_plot$value <- as.numeric(d_plot$value)
 
 q <- ggplot(data = d_plot, aes(x = reorder(colname,X=as.numeric(colname)), y=value)) +
-  geom_boxplot(outlier.size = 2.0, outlier.shape = NA) +
-  geom_jitter(color = ifelse(d_plot$value > 800, "black","gray"), show.legend = FALSE) +
+  geom_jitter(color = ifelse(d_plot$value > 800, "black","gray"), 
+             show.legend = FALSE, 
+             size = ifelse(d_plot$value > 800, 3,2),
+             width = 0.2) +
+  geom_boxplot(outlier.size = 2.0, 
+               outlier.shape = NA,
+               fill="gray") +
   geom_hline(yintercept = 774.25, linetype = "dashed", color = "gray") +
   ggtitle("ΔAverage FRNT of ELISA k-means clusters") + 
   xlab("Reciprocal ELISA Sera Dilution") +
   ylab("Absolute difference of cluster FRNT values") +
-  theme(axis.title = element_text(size = 18),
-        title = element_text(size = 20),
-        axis.text = element_text(size = 14))
+  theme_classic() + 
+  theme(axis.title = element_text(size = 18,hjust=0.5),
+        plot.title = element_text(size = 22, hjust = 0.5),
+        axis.text = element_text(size = 16))
   
 ggsave("Average_FRNT_of_ELISA_kmeans_clusters.tiff", q)
 q

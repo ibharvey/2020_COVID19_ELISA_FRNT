@@ -1,7 +1,7 @@
 library(ggplot2)
 library(tidyverse)
 
-setwd("~/Box/Fremont/Bioinformatics/ELISA/MayoCOVID19/20200421_ELISA_Processing/")
+setwd("~/Dropbox/Fremont/Bioinformatics/ELISA/MayoCOVID19/20200421_ELISA_Processing/")
 mydata <- read.csv(paste("EC50_Correlations_Pearson_Values.csv",sep=""),header=TRUE)
 
 rownames(mydata) <- mydata[c(1)]$X
@@ -17,6 +17,7 @@ p <- ggplot(data = dt2, aes(x = rowname, y=colname,fill=value)) +
 p
 #dev.off()
 ggsave("EC50_Pearson_Correlations.tiff",p)
+ggsave("EC50_Pearson_Correlations.eps",p)
 
 mydata <- read.csv(paste("EC50_Correlations_PValues_Values.csv",sep=""),header=TRUE)
 
@@ -35,3 +36,4 @@ q <- ggplot(data = dt2, aes(x = rowname, y=colname,fill=value)) +
 q
 #dev.off()
 ggsave("EC50_Pvalue_Correlations.tiff",q)
+ggsave("EC50_Pvalue_Correlations.eps",q)
