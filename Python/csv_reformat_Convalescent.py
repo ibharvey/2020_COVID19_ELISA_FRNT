@@ -5,8 +5,8 @@ import re
 
 d = "/home/ian/Dropbox/Fremont/Bioinformatics/ELISA/AliConvalescent/"
 
-frl = open(d+'20200503_ELISA_80_convalescent_samples.csv','r').readlines() #replicate 1
-brl = open(d+'20200507_ELISA_80_convalescent_samples2.csv','r').readlines() #replicate 2
+frl = open(d+'20200503_ELISA_80_convalescent_samples.csv','r').readlines()[2:] #replicate 1
+brl = open(d+'20200507_ELISA_80_convalescent_samples2.csv','r').readlines()[2:] #replicate 2
 
 names = []
 dt = [[] for x in range(12)]

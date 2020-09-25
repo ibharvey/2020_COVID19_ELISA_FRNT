@@ -6,6 +6,7 @@ library(tidyverse)
 library(corrplot)
 
 dilution <- "320"
+dilution.mes <- "1280"
 
 ######### Negs
 mynegs <- read.csv(paste("~/Dropbox/Fremont/Bioinformatics/ELISA/MayoCOVID19/20200421_ELISA_Processing/",
@@ -14,7 +15,7 @@ mynegs <- mynegs[c("SARS2.Trimer","SARS2.mRBD","SARS2.bRBD","SARS1.bRBD","MERS.b
 
 rownames(mynegs) <- c("KL7","AM21","SW9","PZ24","JS33","AH48","CR35","RW26","VK50","CG8","BL67","BG20","JG64","JS19","CK34","JT6")
 mesnegs <- read.csv(paste("~/Dropbox/Fremont/Bioinformatics/Code/Github/2020_COVID19_ELISA_FRNT/data/",
-                          dilution, "_all_UChicago.csv",sep=""),header=TRUE)
+                          dilution.mes, "_all_UChicago.csv",sep=""),header=TRUE)
 rownames(mesnegs) <- mesnegs$X
 mesnegs <- mesnegs[c(2:11)]
 names(mesnegs) <- c("SARS2.Trimer","SARS2.mRBD","SARS2.bRBD","SARS1.bRBD","MERS.bRBD","SARS2.ORF8","SARS2.NP.FL","ChkP62E1","HA","SARS2.NP.RNA")
@@ -39,14 +40,14 @@ mydata_cat <- mydata_cat[c("FRNT","ChkP62E1","HA","MERS.bRBD","SARS2.ORF8","SARS
 
 
 mesdata <- read.csv(paste("~/Dropbox/Fremont/Bioinformatics/Code/Github/2020_COVID19_ELISA_FRNT/data/",
-                          dilution, "_all_MayoClinic.csv",sep=""),header=TRUE)
+                          dilution.mes, "_all_MayoClinic.csv",sep=""),header=TRUE)
 rownames(mesdata) <- mesdata$X
 mesdata <- mesdata[c(2:11)]
 names(mesdata) <- c("SARS2.Trimer","SARS2.mRBD","SARS2.bRBD","SARS1.bRBD","MERS.bRBD","SARS2.ORF8","SARS2.NP.FL","ChkP62E1","HA","SARS2.NP.RNA")
 
 
 mesdata2 <- read.csv(paste("~/Dropbox/Fremont/Bioinformatics/Code/Github/2020_COVID19_ELISA_FRNT/data/",
-                           dilution, "_all_Convalescent.csv",sep=""),header=TRUE)
+                           dilution.mes, "_all_Convalescent.csv",sep=""),header=TRUE)
 mesdata2 <- mesdata2[c(2:11)]
 names(mesdata2) <- c("SARS2.Trimer","SARS2.mRBD","SARS2.bRBD","SARS1.bRBD","MERS.bRBD","SARS2.ORF8","SARS2.NP.FL","ChkP62E1","HA","SARS2.NP.RNA")
 
@@ -216,39 +217,15 @@ corrplot(res,tl.col = "black", method = "color",
          number.cex = 1)
 dev.off()
 
-##################################################################3
-
-cdf <- mydata_cat[c("SARS1.bRBD","SARS2.mRBD")]
-ndf <- mynegs[c("SARS1.bRBD","SARS2.mRBD")]
-pca_df <- prcomp(cdf, retx=TRUE, center=TRUE, scale=TRUE)
-nega_points <- as.data.frame(predict(pca_df, ndf))
-eigs <- pca_df$sdev^2
-provar <- eigs / sum(eigs)
-
-my_points <- as.data.frame(predict(pca_df, cdf))
-my_points$FRNT <- mydata_cat$FRNT
-
-plot_out2 <- ggplot()
-#plot_out2 <- plot_out2 + geom_point(data = df_out, aes(x=PC1, y=PC2, colour=group1, size=1.5))
-#  + geom_point(data = df_out, alpha = 0.3, color="white",aes(x=PC1, y=PC2,size=1.5))
-plot_out2 <- plot_out2 + scale_size(guide = 'none')
-plot_out2 <- plot_out2 + geom_point(data = my_points, aes(x=PC1, y=PC2, size=1.5, colour=FRNT)) 
-plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=1.5), color="red")
-plot_out2 <- plot_out2 + scale_colour_gradient(trans='log2', limits=c(32,4096), na.value = 'black', name='FRNT')
-plot_out2 <- plot_out2 + ggtitle(paste("PCA of S1-bRBD and S2-mRBD ELISA [1:", dilution, "] vs FRNT", sep = "")) +
-  theme(plot.title = element_text(size = 18)) + 
-  xlab(paste("PC1 [", trimws(format(round(provar[1]*100,2))), "%]", sep="")) + 
-  ylab(paste("PC2 [", trimws(format(round(provar[2]*100,2))), "%]", sep=""))
-#ggsave(paste("20200423_PCA_",dilution,"S2S1RBD_vs_FRNT_chicago_conv.tiff",sep = ""), plot = plot_out2)
-plot_out2
+##################################################################
 
 ######################################################
 
 mes_set <- c("SARS2.Trimer","SARS2.mRBD","SARS2.bRBD","SARS1.bRBD","MERS.bRBD","SARS2.ORF8","SARS2.NP.FL","ChkP62E1","HA","SARS2.NP.RNA")
 
-cdf <- mesdata2[c("SARS2.mRBD", "SARS2.Trimer")]
-ddf <- mesdata[c("SARS2.mRBD", "SARS2.Trimer")]
-ndf <- mesnegs[c("SARS2.mRBD", "SARS2.Trimer")]
+cdf <- mesdata_cat[c("SARS2.NP.FL", "SARS2.Trimer", "SARS2.mRBD", "SARS2.ORF8")]
+ddf <- mesdata_cat[c("SARS2.NP.FL", "SARS2.Trimer", "SARS2.mRBD", "SARS2.ORF8")]
+ndf <- mesnegs[c("SARS2.NP.FL", "SARS2.Trimer", "SARS2.mRBD", "SARS2.ORF8")]
 # 
 
 # cdf <- mesdata2[c("SARS1.bRBD","SARS2.mRBD")]
@@ -258,60 +235,69 @@ ndf <- mesnegs[c("SARS2.mRBD", "SARS2.Trimer")]
 pca_df <- prcomp(cdf, retx=TRUE, center=TRUE, scale=TRUE)
 nega_points <- as.data.frame(predict(pca_df, ndf))
 mayo_points <- as.data.frame(predict(pca_df, ddf))
-mayo_points$FRNT <- mesdata$FRNT
+mayo_points$FRNT <- mesdata_cat$FRNT
 eigs <- pca_df$sdev^2
 provar <- eigs / sum(eigs)
 
 my_points <- as.data.frame(predict(pca_df, cdf))
-my_points$FRNT <- mesdata2$FRNT
+my_points$FRNT <- mesdata_cat$FRNT
 
 plot_out2 <- ggplot()
 plot_out2 <- plot_out2 + scale_size(guide = 'none')
 
-# # Diagonal cutoffs front-slash
+# Diagonal cutoffs front-slash
+# # S & NP
 # plot_out2 <- plot_out2 + geom_abline(intercept = -1.9, slope=-1,linetype="dotted",color="dark gray",size=2)
 # plot_out2 <- plot_out2 + geom_abline(intercept = -1.4, slope=-1,linetype="dashed",color="dark gray", size=2)
 # plot_out2 <- plot_out2 + geom_abline(intercept = 1, slope=-1,linetype="solid",color="dark gray", size=2)
-# plot_out2 <- plot_out2 + geom_point(data = my_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
-# plot_out2 <- plot_out2 + geom_point(data = mayo_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
-# plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=1.5), color="red")
-# plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=3), color="red")
+# # S, mRBD, NP
+# plot_out2 <- plot_out2 + geom_abline(intercept = -2.8, slope=-1,linetype="dotted",color="dark gray",size=2)
+# plot_out2 <- plot_out2 + geom_abline(intercept = -2, slope=-1,linetype="dashed",color="dark gray", size=2)
+# plot_out2 <- plot_out2 + geom_abline(intercept = 0.6, slope=-1,linetype="solid",color="dark gray", size=2)
+# S, mRBD, NP, ORF8
+plot_out2 <- plot_out2 + geom_abline(intercept = -2.4, slope=-1,linetype="dotted",color="dark gray",size=2)
+plot_out2 <- plot_out2 + geom_abline(intercept = -1.6, slope=-1,linetype="dashed",color="dark gray", size=2)
+plot_out2 <- plot_out2 + geom_abline(intercept = 0.6, slope=-1,linetype="solid",color="dark gray", size=2)
+plot_out2 <- plot_out2 + geom_point(data = my_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
+plot_out2 <- plot_out2 + geom_point(data = mayo_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
+plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=1.5), color="red")
+plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=3), color="red")
 
 
-plot_out2 <- plot_out2 + geom_point(data = my_points, aes(x=PC1, y=PC2, size=3, colour=FRNT, alpha = 0.3))
-plot_out2 <- plot_out2 + geom_point(data = mayo_points, aes(x=PC1, y=PC2, size=3, colour=FRNT, alpha = 0.3))
-plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=1.5), color="red", alpha = 0.0)
-# Patient 2
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(11,20),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark red", size = 5)
-#plot_out2 <- plot_out2 + geom_text(data = df3, aes(x = x1, y = y1, label = "Patient 2"), nudge_x = 0.65, nudge_y = -0.1)
-
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(20,21),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(aes(x = PC11, y = PC21, xend = PC12, yend = PC22), data = df3, color = "dark red", size = 5)
-
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(21,22),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(aes(x = PC11, y = PC21, xend = PC12, yend = PC22), data = df3, color = "dark red", size = 5, arrow = arrow(length = unit(0.5, "inches")))
-
-
-#Patient 8
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(6,31),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark green", size = 5)
-
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(31,32),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark green", size = 5, arrow = arrow(length = unit(0.5, "inches")))
-
-#Patient 3
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(13,26),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark orange", size = 5)
-
-df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(26,39),])))[c("PC1","PC2")])))
-plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark orange", size = 5, arrow = arrow(length = unit(0.5, "inches")))
+# plot_out2 <- plot_out2 + geom_point(data = my_points, aes(x=PC1, y=PC2, size=3, colour=FRNT, alpha = 0.3))
+# #plot_out2 <- plot_out2 + geom_point(data = mayo_points, aes(x=PC1, y=PC2, size=3, colour=FRNT, alpha = 0.3))
+# plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=1.5), color="red", alpha = 0.0)
+# # Patient 2
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(11,20),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark red", size = 5)
+# #plot_out2 <- plot_out2 + geom_text(data = df3, aes(x = x1, y = y1, label = "Patient 2"), nudge_x = 0.65, nudge_y = -0.1)
+# 
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(20,21),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(aes(x = PC11, y = PC21, xend = PC12, yend = PC22), data = df3, color = "dark red", size = 5)
+# 
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(21,22),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(aes(x = PC11, y = PC21, xend = PC12, yend = PC22), data = df3, color = "dark red", size = 5, arrow = arrow(length = unit(0.5, "inches")))
+# 
+# 
+# #Patient 8
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(6,31),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark green", size = 5)
+# 
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(31,32),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark green", size = 5, arrow = arrow(length = unit(0.5, "inches")))
+# 
+# #Patient 3
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(13,26),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark orange", size = 5)
+# 
+# df3 <- as.data.frame(t(unlist(do.call(rbind.data.frame, list(c(mayo_points[c(26,39),])))[c("PC1","PC2")])))
+# plot_out2 <- plot_out2 + geom_segment(data = df3, aes(x = PC11, y = PC21, xend = PC12, yend = PC22), color = "dark orange", size = 5, arrow = arrow(length = unit(0.5, "inches")))
 
 
 
 plot_out2 <- plot_out2 + scale_colour_gradient(trans='log2', limits=c(32,4096), na.value = 'black', name='FRNT')
 plot_out2 <- plot_out2 + ggtitle(paste("PCA of MSD [1:", dilution, "] vs FRNT", sep = ""),
-                                 subtitle = "SARS-CoV-2 mRBD & S") +
+                                 subtitle = "SARS-CoV-2 S, mRBD, NP, ORF8") +
   theme_minimal() +
   theme(plot.title = element_text(size = 18, hjust = 0.5),
         plot.subtitle = element_text(size = 14, hjust = 0.5),
@@ -331,7 +317,7 @@ plot_out2
 #Precision/Recall/Accuracy
 add_PRA <- function(tbl)
 {
-  tbl[[1]] <- tbl[[1]] + 16 # If assuming common CoV serum does not neutralize SARS-CoV-2
+  #tbl[[1]] <- tbl[[1]] + 16 # If assuming common CoV serum does not neutralize SARS-CoV-2
   n = sum(tbl) # number of instances
   nc = nrow(tbl) # number of classes
   diag = diag(tbl) # number of correctly classified instances per class 
@@ -355,25 +341,25 @@ add_PRA <- function(tbl)
   out
 }
 
-results.close <- data.frame(matrix(ncol = 8, nrow = 0))
-results.far <- data.frame(matrix(ncol = 8, nrow = 0))
-results.veryfar <- data.frame(matrix(ncol = 8, nrow = 0))
+results.weak <- data.frame(matrix(ncol = 8, nrow = 0))
+results.moderate <- data.frame(matrix(ncol = 8, nrow = 0))
+results.strong <- data.frame(matrix(ncol = 8, nrow = 0))
 for(it in 20:1000)
 {
   # Diagonal cutoffs - back-slash
-  results.close <- rbind(results.close,
-                         add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 - 1.9 < mayo_points$PC2))))
-  results.far <- rbind(results.far,
-                       add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 - 1.4 < mayo_points$PC2))))
-  results.veryfar <- rbind(results.veryfar,
-                           add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 + 1 < mayo_points$PC2))))
+  results.weak <- rbind(results.weak,
+                         add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 - 2.4 < mayo_points$PC2))))
+  results.moderate <- rbind(results.moderate,
+                       add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 - 1.6 < mayo_points$PC2))))
+  results.strong <- rbind(results.strong,
+                           add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 + 0.6 < mayo_points$PC2))))
 }
 
 plot_out2 <- ggplot()
 #plot_out2 <- plot_out2 + geom_point(data = df_out, aes(x=PC1, y=PC2, colour=group1, size=1.5))
 #  + geom_point(data = df_out, alpha = 0.3, color="white",aes(x=PC1, y=PC2,size=1.5))
 plot_out2 <- plot_out2 + scale_size(guide = 'none')
-plot_out2 <- plot_out2 + geom_point(data = results.close, aes(x=Sensitivity, y=Precision, size=1.5, colour=Cutoff))
+plot_out2 <- plot_out2 + geom_point(data = results.weak, aes(x=Sensitivity, y=Precision, size=1.5, colour=Cutoff))
 plot_out2 <- plot_out2 + scale_colour_gradient(trans='log2', limits=c(16,1024), na.value = 'black', name='FRNT')
 plot_out2 <- plot_out2 + ggtitle(paste("PR Curve - Weak Cutoff", sep = ""))  +
   theme_classic() +
@@ -391,9 +377,9 @@ plot_out2
 #Accuracy plot based on cutoff
 plot_out3 <- ggplot() + 
   scale_size(guide = 'none') +
-  geom_line(data = results.close, aes(x = Cutoff, y = Accuracy), linetype = "dotted", size = 1) +
-  geom_line(data = results.far  , aes(x = Cutoff, y = Accuracy), linetype = "dashed", size = 1) +
-  geom_line(data = results.veryfar  , aes(x = Cutoff, y = Accuracy), linetype = "solid", size = 1) +
+  geom_line(data = results.weak, aes(x = Cutoff, y = Accuracy), linetype = "dotted", size = 1) +
+  geom_line(data = results.moderate  , aes(x = Cutoff, y = Accuracy), linetype = "dashed", size = 1) +
+  geom_line(data = results.strong  , aes(x = Cutoff, y = Accuracy), linetype = "solid", size = 1) +
   theme_classic() +
   ggtitle(paste("Prediction Accuracy of MSD PCA [1:", dilution, "]", sep = ""),
           subtitle = "SARS-CoV-2 mRBD & S")  +
@@ -418,9 +404,9 @@ plot_out3
 
 my_set <- c("SARS2.Trimer","SARS2.mRBD","SARS2.bRBD","SARS1.bRBD","MERS.bRBD","SARS2.ORF8","SARS2.NP.FL","ChkP62E1","HA","SARS2.NP.RNA")
 
-cdf <- mydata2[c("SARS2.mRBD","SARS2.Trimer")]
-ddf <- mydata[c("SARS2.mRBD","SARS2.Trimer")]
-ndf <- mynegs[c("SARS2.mRBD","SARS2.Trimer")]
+cdf <- mydata_cat[c("SARS2.NP.FL","SARS2.Trimer", "SARS2.mRBD", "SARS2.ORF8")]
+ddf <- mydata_cat[c("SARS2.NP.FL","SARS2.Trimer", "SARS2.mRBD", "SARS2.ORF8")]
+ndf <- mynegs[c("SARS2.NP.FL","SARS2.Trimer", "SARS2.mRBD", "SARS2.ORF8")]
 
 # cdf <- mydata2[c("SARS1.bRBD","SARS2.mRBD")]
 # ddf <- mydata[c("SARS1.bRBD","SARS2.mRBD")]
@@ -433,27 +419,36 @@ ndf <- mynegs[c("SARS2.mRBD","SARS2.Trimer")]
 pca_df <- prcomp(cdf, retx=TRUE, center=TRUE, scale=TRUE)
 nega_points <- as.data.frame(predict(pca_df, ndf))
 mayo_points <- as.data.frame(predict(pca_df, ddf))
-mayo_points$FRNT <- mesdata$FRNT
+mayo_points$FRNT <- mesdata_cat$FRNT
 eigs <- pca_df$sdev^2
 provar <- eigs / sum(eigs)
 
 my_points <- as.data.frame(predict(pca_df, cdf))
-my_points$FRNT <- mesdata2$FRNT
+my_points$FRNT <- mesdata_cat$FRNT
 
 plot_out2 <- ggplot()
 
-#Vertical cutoffs
-plot_out2 <- plot_out2 + geom_vline(xintercept = -2.6, linetype = "dotted", color="dark gray",size = 2)
-plot_out2 <- plot_out2 + geom_vline(xintercept = -0.5, linetype = "dashed", color="dark gray",size = 2)
-plot_out2 <- plot_out2 + geom_vline(xintercept = 0.5, linetype = "solid", color="dark gray",size = 2)
-# #Forward slash cutoffs
+# #Vertical cutoffs
+# plot_out2 <- plot_out2 + geom_vline(xintercept = -2.6, linetype = "dotted", color="dark gray",size = 2)
+# plot_out2 <- plot_out2 + geom_vline(xintercept = -0.5, linetype = "dashed", color="dark gray",size = 2)
+# plot_out2 <- plot_out2 + geom_vline(xintercept = 0.5, linetype = "solid", color="dark gray",size = 2)
+#Forward slash cutoffs
+# # S and NP
 # plot_out2 <- plot_out2 + geom_abline(intercept = 3.4, slope=1,linetype="dotted",color="dark gray", size=2)
 # plot_out2 <- plot_out2 + geom_abline(intercept = 0.6, slope=1,linetype="dashed",color="dark gray",size=2)
 # plot_out2 <- plot_out2 + geom_abline(intercept = -0.5, slope=1,linetype="solid",color="dark gray",size=2)
+# # S, NP, mRBD
+# plot_out2 <- plot_out2 + geom_abline(intercept = -3, slope=-1,linetype="dotted",color="dark gray", size=2)
+# plot_out2 <- plot_out2 + geom_abline(intercept = -1, slope=-1,linetype="dashed",color="dark gray",size=2)
+# plot_out2 <- plot_out2 + geom_abline(intercept = 0.5, slope=-1,linetype="solid",color="dark gray",size=2)
+# S, NP, mRBD, ORF8
+plot_out2 <- plot_out2 + geom_abline(intercept = -2.5, slope=-1,linetype="dotted",color="dark gray", size=2)
+plot_out2 <- plot_out2 + geom_abline(intercept = -1, slope=-1,linetype="dashed",color="dark gray",size=2)
+plot_out2 <- plot_out2 + geom_abline(intercept = 0.5, slope=-1,linetype="solid",color="dark gray",size=2)
 
 plot_out2 <- plot_out2 + scale_size(guide = 'none')
 plot_out2 <- plot_out2 + geom_point(data = my_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
-plot_out2 <- plot_out2 + geom_point(data = mayo_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
+#plot_out2 <- plot_out2 + geom_point(data = mayo_points, aes(x=PC1, y=PC2, size=3, colour=FRNT))
 plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=1.5), color="red")
 plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=3), color="red")
 
@@ -490,7 +485,7 @@ plot_out2 <- plot_out2 + geom_point(data = nega_points, aes(x=PC1, y=PC2, size=3
 
 plot_out2 <- plot_out2 + scale_colour_gradient(trans='log2', limits=c(32,4096), na.value = 'black', name='FRNT')
 plot_out2 <- plot_out2 + ggtitle(paste("PCA of ELISA [1:", dilution, "] vs FRNT", sep = ""),
-                                 subtitle = "SARS-CoV-2 mRBD & S") +
+                                 subtitle = "SARS-CoV-2 S, mRBD, NP, ORF8") +
   theme_minimal() +
   theme(plot.title = element_text(size = 18,hjust=0.5),
         plot.subtitle = element_text(size = 14, hjust=0.5),
@@ -509,7 +504,7 @@ plot_out2
 
 add_PRA <- function(tbl)
 {
-  tbl[[1]] <- tbl[[1]] + 16 # If assuming common CoV serum does not neutralize SARS-CoV-2
+  #tbl[[1]] <- tbl[[1]] + 16 # If assuming common CoV serum does not neutralize SARS-CoV-2
   n = sum(tbl) # number of instances
   nc = nrow(tbl) # number of classes
   diag = diag(tbl) # number of correctly classified instances per class 
@@ -534,26 +529,34 @@ add_PRA <- function(tbl)
 }
 
 
-results.close <- data.frame(matrix(ncol = 8, nrow = 0))
-results.far <- data.frame(matrix(ncol = 8, nrow = 0))
-results.veryfar <- data.frame(matrix(ncol = 8, nrow = 0))
+results.weak <- data.frame(matrix(ncol = 8, nrow = 0))
+results.moderate <- data.frame(matrix(ncol = 8, nrow = 0))
+results.strong <- data.frame(matrix(ncol = 8, nrow = 0))
 for(it in 20:1000)
 {
   # # Forward-slash cutoffs
-  # results.close <- rbind(results.close,
+  # results.weak <- rbind(results.weak,
   #                        add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * 1.0 + 3.4 > mayo_points$PC2))))
-  # results.far <- rbind(results.far, 
+  # results.moderate <- rbind(results.moderate,
   #                      add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * 1.0 + 0.6 > mayo_points$PC2))))
-  # results.veryfar <- rbind(results.veryfar,
+  # results.strong <- rbind(results.strong,
   #                       add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * 1.0 + -0.5 > mayo_points$PC2))))
   
-  # Vertical cutoffs
-  results.close <- rbind(results.close,
-                         add_PRA(as.matrix(table(mayo_points$FRNT > it, mayo_points$PC1 > -2.6))))
-  results.far <- rbind(results.far,
-                       add_PRA(as.matrix(table(mayo_points$FRNT > it, mayo_points$PC1 > -0.5))))
-  results.veryfar <- rbind(results.veryfar,
-                           add_PRA(as.matrix(table(mayo_points$FRNT > it, mayo_points$PC1 >  0.5))))
+  # Back-slash cutoffs
+  results.weak <- rbind(results.weak,
+                        add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 - 2.5 < mayo_points$PC2))))
+  results.moderate <- rbind(results.moderate,
+                            add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 - 1.0 < mayo_points$PC2))))
+  results.strong <- rbind(results.strong,
+                          add_PRA(as.matrix(table(mayo_points$FRNT > it,mayo_points$PC1 * -1.0 + 0.5 < mayo_points$PC2))))
+  
+  # # Vertical cutoffs
+  # results.weak <- rbind(results.weak,
+  #                        add_PRA(as.matrix(table(mayo_points$FRNT > it, mayo_points$PC1 > -2.6))))
+  # results.moderate <- rbind(results.moderate,
+  #                      add_PRA(as.matrix(table(mayo_points$FRNT > it, mayo_points$PC1 > -0.5))))
+  # results.strong <- rbind(results.strong,
+  #                          add_PRA(as.matrix(table(mayo_points$FRNT > it, mayo_points$PC1 >  0.5))))
 }
 
 
@@ -563,7 +566,7 @@ plot_out2 <- ggplot()
 #plot_out2 <- plot_out2 + geom_point(data = df_out, aes(x=PC1, y=PC2, colour=group1, size=1.5))
 #  + geom_point(data = df_out, alpha = 0.3, color="white",aes(x=PC1, y=PC2,size=1.5))
 plot_out2 <- plot_out2 + scale_size(guide = 'none')
-plot_out2 <- plot_out2 + geom_point(data = results.close, aes(x=RecallT, y=PrecisionT, size=1.5, colour=Cutoff))
+plot_out2 <- plot_out2 + geom_point(data = results.weak, aes(x=RecallT, y=PrecisionT, size=1.5, colour=Cutoff))
 plot_out2 <- plot_out2 + scale_colour_gradient(trans='log2', limits=c(16,1024), na.value = 'black', name='FRNT')
 plot_out2 <- plot_out2 + ggtitle(paste("PR Curve - Weak Cutoff", sep = ""))  +
   theme_classic() +
@@ -581,9 +584,9 @@ plot_out2
 #Accuracy plot based on cutoff
 plot_out3 <- ggplot() + 
   scale_size(guide = 'none') +
-  geom_line(data = results.close, aes(x = Cutoff, y = Accuracy), linetype = "dotted", size = 1) +
-  geom_line(data = results.far  , aes(x = Cutoff, y = Accuracy), linetype = "dashed", size = 1) +
-  geom_line(data = results.veryfar, aes(x = Cutoff, y = Accuracy), linetype = "solid", size = 1) +
+  geom_line(data = results.weak, aes(x = Cutoff, y = Accuracy), linetype = "dotted", size = 1) +
+  geom_line(data = results.moderate  , aes(x = Cutoff, y = Accuracy), linetype = "dashed", size = 1) +
+  geom_line(data = results.strong, aes(x = Cutoff, y = Accuracy), linetype = "solid", size = 1) +
   theme_classic() +
   ggtitle(paste("Prediction Accuracy of ELISA PCA [1:", dilution, "]", sep = ""),
           subtitle = "SARS-CoV-2 mRBD & S")  +
